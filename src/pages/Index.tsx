@@ -88,7 +88,7 @@ const Index = () => {
   const [selectedComponents, setSelectedComponents] = useState<{[key: string]: PCComponent}>({})
   const [builds, setBuilds] = useState(sampleBuilds)
   const [searchTerm, setSearchTerm] = useState('')
-  const [priceRange, setPriceRange] = useState([0, 200000])
+  const [priceRange, setPriceRange] = useState([0, 300000])
 
   const componentTypes = [
     { key: 'cpu', name: 'Процессор', icon: 'Cpu' },
@@ -178,7 +178,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="gamer-gradient text-white py-16">
+      <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-purple-400 text-white py-16">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center mb-8">
             <img 
@@ -187,10 +187,10 @@ const Index = () => {
               className="w-16 h-16 mr-4 shark-logo rounded-full"
             />
             <h1 className="text-6xl font-bold">
-              SHARK<span className="text-purple-200">PC</span>
+              SHARK<span className="text-blue-200">PC</span>
             </h1>
           </div>
-          <p className="text-center text-xl text-purple-100 max-w-2xl mx-auto">
+          <p className="text-center text-xl text-blue-100 max-w-2xl mx-auto">
             Профессиональный конфигуратор игровых ПК с поиском по лучшим маркетплейсам России
           </p>
         </div>
@@ -233,15 +233,7 @@ const Index = () => {
                     <CardTitle className="text-2xl">Конфигуратор ПК</CardTitle>
                     <CardDescription>Выберите компоненты для вашего игрового ПК</CardDescription>
                   </div>
-                  <div className="flex gap-4">
-                    <Button onClick={checkCompatibility} variant="outline">
-                      <Icon name="CheckCircle" size={20} className="mr-2" />
-                      Проверить совместимость
-                    </Button>
-                    <Button className="bg-primary hover:bg-primary/90">
-                      <Icon name="Search" size={20} className="mr-2" />
-                      Найти ПК
-                    </Button>
+                  <div>
                   </div>
                 </div>
               </CardHeader>
@@ -274,26 +266,30 @@ const Index = () => {
                             <DialogTitle>Выбор компонента: {type.name}</DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4">
-                            <div className="flex gap-4">
-                              <div className="flex-1">
-                                <Input
-                                  placeholder="Поиск компонентов..."
-                                  value={searchTerm}
-                                  onChange={(e) => setSearchTerm(e.target.value)}
-                                  className="w-full"
-                                />
-                              </div>
-                              <div className="w-64">
-                                <div className="text-sm text-gray-600 mb-2">
-                                  Цена: {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} ₽
+                            <div className="space-y-4">
+                              <div className="flex justify-center">
+                                <div className="w-96">
+                                  <div className="text-sm text-gray-600 mb-2 text-center">
+                                    Цена: {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} ₽
+                                  </div>
+                                  <Slider
+                                    value={priceRange}
+                                    onValueChange={setPriceRange}
+                                    max={300000}
+                                    step={5000}
+                                    className="w-full"
+                                  />
                                 </div>
-                                <Slider
-                                  value={priceRange}
-                                  onValueChange={setPriceRange}
-                                  max={200000}
-                                  step={5000}
-                                  className="w-full"
-                                />
+                              </div>
+                              <div className="flex justify-center">
+                                <div className="w-96">
+                                  <Input
+                                    placeholder="Поиск компонентов..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full"
+                                  />
+                                </div>
                               </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
@@ -331,8 +327,15 @@ const Index = () => {
                   </div>
                 ))}
                 
+                <div className="flex justify-center mt-6">
+                  <Button onClick={checkCompatibility} variant="outline" size="lg">
+                    <Icon name="CheckCircle" size={20} className="mr-2" />
+                    Проверить совместимость
+                  </Button>
+                </div>
+                
                 {Object.keys(selectedComponents).length > 0 && (
-                  <div className="mt-8 p-6 bg-gradient-to-r from-purple-100 to-purple-50 rounded-lg">
+                  <div className="mt-8 p-6 bg-gradient-to-r from-blue-100 to-purple-50 rounded-lg">
                     <h3 className="text-xl font-semibold mb-4">Итого</h3>
                     <div className="flex justify-between items-center">
                       <span className="text-lg">Общая стоимость:</span>
@@ -340,6 +343,30 @@ const Index = () => {
                     </div>
                   </div>
                 )}
+                
+                <div className="mt-8 space-y-6">
+                  <div className="flex justify-center">
+                    <Button className="bg-primary hover:bg-primary/90" size="lg">
+                      <Icon name="Search" size={20} className="mr-2" />
+                      Найти ПК
+                    </Button>
+                  </div>
+                  
+                  <div className="flex justify-center gap-4">
+                    <Button variant="outline" className="bg-orange-500 hover:bg-orange-600 text-white border-orange-500">
+                      Ozon
+                    </Button>
+                    <Button variant="outline" className="bg-purple-500 hover:bg-purple-600 text-white border-purple-500">
+                      Wildberries
+                    </Button>
+                    <Button variant="outline" className="bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500">
+                      Yandex Market
+                    </Button>
+                    <Button variant="outline" className="bg-red-500 hover:bg-red-600 text-white border-red-500">
+                      DNS
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
