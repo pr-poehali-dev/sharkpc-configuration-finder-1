@@ -184,23 +184,28 @@ export default function Builds() {
             Назад к сборкам
           </Button>
           
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h1 className="text-3xl font-bold mb-2">{build.name}</h1>
+          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6">
+              <div className="mb-4 sm:mb-0">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-2">{build.name}</h1>
                 <p className="text-gray-600">Автор: {build.author}</p>
                 <p className="text-sm text-gray-500">Создано: {build.createdAt}</p>
+                {/* Цена под автором только на мобильном */}
+                <div className="text-xl sm:hidden font-bold text-blue-600 mt-2">
+                  {build.totalPrice.toLocaleString()} ₽
+                </div>
               </div>
               <div className="flex items-center gap-4">
                 <Button
                   variant="outline"
                   onClick={() => handleLike(build.id)}
-                  className={build.isLiked ? 'text-red-600 border-red-600' : ''}
+                  className={`transition-colors ${build.isLiked ? 'text-red-600 border-red-600' : 'hover:text-red-600'}`}
                 >
-                  <Icon name="Heart" size={20} className={`mr-2 ${build.isLiked ? 'fill-red-600' : ''}`} />
+                  <Icon name="Heart" size={20} className={`mr-2 ${build.isLiked ? 'fill-red-600 text-red-600' : ''}`} />
                   {build.likes}
                 </Button>
-                <div className="text-2xl font-bold text-blue-600">
+                {/* Цена справа только на десктопе */}
+                <div className="hidden sm:block text-2xl font-bold text-blue-600">
                   {build.totalPrice.toLocaleString()} ₽
                 </div>
               </div>
@@ -327,9 +332,9 @@ export default function Builds() {
                       e.stopPropagation();
                       handleLike(build.id);
                     }}
-                    className={build.isLiked ? 'text-red-600' : 'text-gray-600'}
+                    className={`transition-colors ${build.isLiked ? 'text-red-600' : 'text-gray-600 hover:text-red-600'}`}
                   >
-                    <Icon name="Heart" size={16} className={`mr-1 ${build.isLiked ? 'fill-red-600' : ''}`} />
+                    <Icon name="Heart" size={16} className={`mr-1 ${build.isLiked ? 'fill-red-600 text-red-600' : ''}`} />
                     {build.likes}
                   </Button>
                 </div>
