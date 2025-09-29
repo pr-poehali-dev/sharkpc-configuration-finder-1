@@ -50,30 +50,49 @@ const components: Component[] = [
 ];
 
 const categories = [
-  'Процессор', 'Материнская плата', 'Видеокарта', 'Оперативная память', 
-  'Накопитель', 'Блок питания', 'Корпус'
+  { name: 'Процессор', icon: 'Cpu', description: 'Главный вычислительный компонент' },
+  { name: 'Материнская плата', icon: 'CircuitBoard', description: 'Основа для всех компонентов' },
+  { name: 'Видеокарта', icon: 'Monitor', description: 'Обработка графики и игр' },
+  { name: 'Оперативная память', icon: 'HardDrive', description: 'Быстрая память для программ' },
+  { name: 'Накопитель', icon: 'Database', description: 'Хранение данных и программ' },
+  { name: 'Блок питания', icon: 'Zap', description: 'Питание для всех компонентов' },
+  { name: 'Корпус', icon: 'Package', description: 'Защита и охлаждение ПК' }
 ];
 
 export default function Configurator() {
   const [selectedComponents, setSelectedComponents] = useState<Record<string, Component>>({});
   const [priceRange, setPriceRange] = useState([0, 300000]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const filteredComponents = useMemo(() => {
+    if (!selectedCategory) return [];
+    
     return components.filter(component => 
+      component.category === selectedCategory &&
       component.price >= priceRange[0] && 
       component.price <= priceRange[1] &&
       (component.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
        component.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       component.category.toLowerCase().includes(searchTerm.toLowerCase()))
+       component.specs.toLowerCase().includes(searchTerm.toLowerCase()))
     );
-  }, [priceRange, searchTerm]);
+  }, [selectedCategory, priceRange, searchTerm]);
 
   const selectComponent = (component: Component) => {
     setSelectedComponents(prev => ({
       ...prev,
       [component.category]: component
     }));
+    setSelectedCategory(null);
+    setIsSearchOpen(false);
+  };
+
+  const openCategorySearch = (categoryName: string) => {
+    setSelectedCategory(categoryName);
+    setSearchTerm('');
+    setPriceRange([0, 300000]);
+    setIsSearchOpen(true);
   };
 
   const removeComponent = (category: string) => {
@@ -100,41 +119,13 @@ export default function Configurator() {
       <div className="container mx-auto px-6 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Конфигуратор ПК
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Конфигуратор ПК
+            </span>
           </h1>
-          <p className="text-xl text-blue-700 max-w-2xl mx-auto">
-            Соберите идеальный компьютер под ваши задачи и бюджет
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Подберите идеальные комплектующие для вашего ПК
           </p>
-        </div>
-
-        {/* Панель управления */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <div className="space-y-4">
-            <div className="flex justify-center">
-              <div className="w-96">
-                <div className="text-sm text-gray-600 mb-2 text-center">
-                  Цена: {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} ₽
-                </div>
-                <Slider
-                  value={priceRange}
-                  onValueChange={setPriceRange}
-                  max={300000}
-                  step={5000}
-                  className="w-full"
-                />
-              </div>
-            </div>
-            <div className="flex justify-center">
-              <div className="w-96">
-                <Input
-                  placeholder="Поиск компонентов..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Выбранные компоненты */}
@@ -163,110 +154,165 @@ export default function Configurator() {
           </div>
         )}
 
-        {/* Компоненты по категориям */}
-        <div className="space-y-8">
+        {/* Категории компонентов */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {categories.map(category => {
-            const categoryComponents = filteredComponents.filter(c => c.category === category);
+            const selectedComponent = selectedComponents[category.name];
             
-            if (categoryComponents.length === 0) return null;
-
             return (
-              <div key={category} className="bg-white rounded-lg shadow-lg p-6">
-                <h3 className="text-xl font-semibold mb-4">{category}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {categoryComponents.map(component => (
-                    <Card key={component.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <div>
-                            <CardContent className="p-4">
-                              <img 
-                                src={component.image} 
-                                alt={component.name}
-                                className="w-full h-32 object-cover rounded mb-3"
-                              />
-                              <h4 className="font-medium text-sm mb-1">{component.name}</h4>
-                              <p className="text-xs text-gray-600 mb-2">{component.specs}</p>
-                              <div className="flex justify-between items-center">
-                                <span className="font-semibold text-blue-600">{component.price.toLocaleString()} ₽</span>
-                                <span className="text-xs text-gray-500">{component.brand}</span>
-                              </div>
-                            </CardContent>
-                          </div>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-md">
-                          <div className="space-y-4">
-                            <img 
-                              src={component.image} 
-                              alt={component.name}
-                              className="w-full h-48 object-cover rounded"
-                            />
-                            <div>
-                              <h3 className="text-xl font-bold">{component.name}</h3>
-                              <p className="text-gray-600">{component.brand}</p>
-                              <p className="text-lg font-semibold text-blue-600 mt-2">{component.price.toLocaleString()} ₽</p>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold mb-2">Характеристики:</h4>
-                              <p className="text-gray-700">{component.specs}</p>
-                            </div>
-                            <Button 
-                              onClick={() => selectComponent(component)}
-                              className="w-full"
-                            >
-                              {selectedComponents[category]?.id === component.id ? 'Выбрано' : 'Выбрать'}
-                            </Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </Card>
-                  ))}
+              <div key={category.name} className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Icon name={category.icon} size={24} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">{category.name}</h3>
+                    <p className="text-sm text-gray-600">{category.description}</p>
+                  </div>
                 </div>
+                
+                {selectedComponent ? (
+                  <div className="border rounded-lg p-3 mb-4 bg-green-50">
+                    <div className="font-medium text-sm">{selectedComponent.name}</div>
+                    <div className="text-xs text-gray-600">{selectedComponent.specs}</div>
+                    <div className="text-sm font-semibold text-green-600">
+                      {selectedComponent.price.toLocaleString()} ₽
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-gray-200 rounded-lg p-3 mb-4 text-center text-gray-500">
+                    Не выбрано
+                  </div>
+                )}
+                
+                <Button 
+                  onClick={() => openCategorySearch(category.name)}
+                  className="w-full"
+                  variant={selectedComponent ? "outline" : "default"}
+                >
+                  <Icon name="Plus" size={16} className="mr-2" />
+                  {selectedComponent ? 'Изменить' : 'Выбрать'}
+                </Button>
               </div>
             );
           })}
         </div>
 
-        <div className="flex justify-center mt-6">
-          <Button onClick={checkCompatibility} variant="outline" size="lg">
-            <Icon name="CheckCircle" size={20} className="mr-2" />
-            Проверить совместимость
-          </Button>
-        </div>
-        
-        {Object.keys(selectedComponents).length > 0 && (
-          <div className="mt-8 p-6 bg-gradient-to-r from-blue-100 to-purple-50 rounded-lg">
-            <h3 className="text-xl font-semibold mb-4">Итого</h3>
-            <div className="flex justify-between items-center">
-              <span className="text-lg">Общая стоимость:</span>
-              <span className="text-2xl font-bold text-primary">{totalPrice.toLocaleString()} ₽</span>
+        {/* Модальное окно поиска */}
+        <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-2xl font-bold mb-2">{selectedCategory}</h3>
+                <p className="text-gray-600">Выберите подходящий компонент</p>
+              </div>
+
+              {/* Панель фильтров */}
+              <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Цена: {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} ₽
+                  </label>
+                  <Slider
+                    value={priceRange}
+                    onValueChange={setPriceRange}
+                    max={300000}
+                    step={5000}
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <Input
+                    placeholder="Поиск по названию, бренду или характеристикам..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
+              {/* Список компонентов */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredComponents.map(component => (
+                  <Card key={component.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <img 
+                        src={component.image} 
+                        alt={component.name}
+                        className="w-full h-32 object-cover rounded mb-3"
+                      />
+                      <h4 className="font-medium text-sm mb-1">{component.name}</h4>
+                      <p className="text-xs text-gray-600 mb-2">{component.specs}</p>
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="font-semibold text-blue-600">{component.price.toLocaleString()} ₽</span>
+                        <span className="text-xs text-gray-500">{component.brand}</span>
+                      </div>
+                      <Button 
+                        onClick={() => selectComponent(component)}
+                        className="w-full"
+                        size="sm"
+                      >
+                        Выбрать
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {filteredComponents.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  Компоненты не найдены. Попробуйте изменить фильтры.
+                </div>
+              )}
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Кнопка проверки совместимости */}
+        {Object.keys(selectedComponents).length > 1 && (
+          <div className="flex justify-center mt-6">
+            <Button onClick={checkCompatibility} variant="outline" size="lg">
+              <Icon name="CheckCircle" size={20} className="mr-2" />
+              Проверить совместимость
+            </Button>
           </div>
         )}
-        
-        <div className="mt-8 space-y-6">
-          <div className="flex justify-center">
-            <Button className="bg-primary hover:bg-primary/90" size="lg">
-              <Icon name="Search" size={20} className="mr-2" />
-              Найти ПК
-            </Button>
-          </div>
-          
-          <div className="flex justify-center gap-4">
-            <Button variant="outline" className="bg-orange-500 hover:bg-orange-600 text-white border-orange-500">
-              Ozon
-            </Button>
-            <Button variant="outline" className="bg-purple-500 hover:bg-purple-600 text-white border-purple-500">
-              Wildberries
-            </Button>
-            <Button variant="outline" className="bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500">
-              Yandex Market
-            </Button>
-            <Button variant="outline" className="bg-red-500 hover:bg-red-600 text-white border-red-500">
-              DNS
-            </Button>
-          </div>
-        </div>
+        {/* Кнопки маркетплейсов */}
+        {Object.keys(selectedComponents).length > 0 && (
+          <>
+            <div className="mt-8 p-6 bg-gradient-to-r from-blue-100 to-purple-50 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4">Итого</h3>
+              <div className="flex justify-between items-center">
+                <span className="text-lg">Общая стоимость:</span>
+                <span className="text-2xl font-bold text-blue-600">{totalPrice.toLocaleString()} ₽</span>
+              </div>
+            </div>
+            
+            <div className="mt-8 space-y-6">
+              <div className="flex justify-center">
+                <Button className="bg-primary hover:bg-primary/90" size="lg">
+                  <Icon name="Search" size={20} className="mr-2" />
+                  Найти ПК
+                </Button>
+              </div>
+              
+              <div className="flex justify-center gap-4">
+                <Button variant="outline" className="bg-orange-500 hover:bg-orange-600 text-white border-orange-500">
+                  Ozon
+                </Button>
+                <Button variant="outline" className="bg-purple-500 hover:bg-purple-600 text-white border-purple-500">
+                  Wildberries
+                </Button>
+                <Button variant="outline" className="bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500">
+                  Yandex Market
+                </Button>
+                <Button variant="outline" className="bg-red-500 hover:bg-red-600 text-white border-red-500">
+                  DNS
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
